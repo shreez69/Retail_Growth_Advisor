@@ -13,98 +13,138 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # ============================================================
 # RETAIL GROWTH ADVISOR
-# Fast local CSV data mining app
-# No API. No live internet. Uses only local Instacart CSV files.
+# Clean UI version: simple for users, strong for data mining demo
+# No API. Uses only local CSV files.
 # ============================================================
 
 st.set_page_config(
     page_title="Retail Growth Advisor",
     page_icon="🛒",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ---------------- UI STYLE ----------------
+# ---------------- MODERN UI STYLE ----------------
 st.markdown("""
 <style>
 .block-container {
-    padding-top: 1.2rem;
+    padding-top: 1.1rem;
     padding-bottom: 2rem;
+    max-width: 1400px;
 }
-.main-hero {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #334155 100%);
-    padding: 30px 34px;
-    border-radius: 24px;
+[data-testid="stSidebar"] {
+    background: #0f172a;
+}
+[data-testid="stSidebar"] * {
+    color: #f8fafc !important;
+}
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] select,
+[data-testid="stSidebar"] textarea {
+    color: #0f172a !important;
+}
+.hero {
+    background: radial-gradient(circle at top left, #38bdf8 0%, transparent 28%),
+                linear-gradient(135deg, #020617 0%, #0f172a 45%, #1e293b 100%);
     color: white;
-    margin-bottom: 22px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+    padding: 34px 38px;
+    border-radius: 28px;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.28);
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
 }
-.main-hero h1 {
-    font-size: 42px;
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
+.hero h1 {
+    font-size: 46px;
+    line-height: 1.05;
+    margin: 0 0 10px 0;
+    letter-spacing: -1px;
 }
-.main-hero p {
-    font-size: 17px;
-    margin: 0;
+.hero p {
+    font-size: 18px;
+    max-width: 900px;
     color: #cbd5e1;
+    margin: 0;
 }
-.action-box {
-    background: white;
-    border-radius: 20px;
-    padding: 18px 20px;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
-    min-height: 130px;
+.badge {
+    display: inline-block;
+    background: rgba(14,165,233,0.16);
+    color: #bae6fd;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(186,230,253,0.25);
 }
-.action-box h3 {
-    margin-top: 0;
-    color: #0f172a;
-    font-size: 20px;
+.kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 22px;
+    padding: 19px 20px;
+    box-shadow: 0 9px 24px rgba(15, 23, 42, 0.08);
+    height: 118px;
 }
-.action-box p {
-    color: #475569;
-    font-size: 15px;
+.kpi-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
 }
-.metric-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 18px;
-    padding: 18px 20px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+.kpi-number {
+    color: #020617;
+    font-size: 31px;
+    font-weight: 900;
+    margin-top: 6px;
 }
-.metric-label {
+.kpi-note {
     color: #64748b;
     font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
+    margin-top: 2px;
 }
-.metric-number {
-    color: #0f172a;
-    font-size: 30px;
-    font-weight: 800;
-    margin-top: 4px;
-}
-.small-note {
-    color: #64748b;
-    font-size: 14px;
-}
-.good-border {border-left: 7px solid #16a34a;}
-.warn-border {border-left: 7px solid #f59e0b;}
-.bad-border {border-left: 7px solid #dc2626;}
-.info-border {border-left: 7px solid #2563eb;}
-.stTabs [data-baseweb="tab-list"] {
-    gap: 6px;
-}
-.stTabs [data-baseweb="tab"] {
-    background-color: #f8fafc;
-    border-radius: 12px;
-    padding: 8px 14px;
+.panel {
+    background: #ffffff;
     border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+    margin-bottom: 16px;
+}
+.card-title {
+    color: #020617;
+    font-size: 20px;
+    font-weight: 850;
+    margin-bottom: 7px;
+}
+.card-body {
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.45;
+}
+.green {border-left: 8px solid #16a34a;}
+.orange {border-left: 8px solid #f59e0b;}
+.blue {border-left: 8px solid #2563eb;}
+.red {border-left: 8px solid #dc2626;}
+.purple {border-left: 8px solid #7c3aed;}
+.stTabs [data-baseweb="tab-list"] {gap: 8px;}
+.stTabs [data-baseweb="tab"] {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 9px 16px;
+    font-weight: 700;
 }
 .stTabs [aria-selected="true"] {
-    background-color: #e0f2fe !important;
+    background: #dbeafe !important;
     color: #0f172a !important;
+    border-color: #93c5fd !important;
+}
+.small-muted {
+    color: #64748b;
+    font-size: 13px;
+}
+hr {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -115,17 +155,17 @@ missing_files = [f for f in required_files if not Path(f).exists()]
 
 if missing_files:
     st.error("Missing required file(s): " + ", ".join(missing_files))
-    st.info("Put this app.py file in the same folder as order_products__train.csv and products.csv.")
+    st.info("Put app.py in the same folder as order_products__train.csv and products.csv.")
     st.stop()
 
-# ---------------- SIDEBAR ----------------
-st.sidebar.title("Control Panel")
+# ---------------- SIDEBAR CONTROLS ----------------
+st.sidebar.title("🛠 Control Panel")
+st.sidebar.caption("Use Fast Demo during presentation. Use Balanced for stronger screenshots.")
 
 speed_mode = st.sidebar.selectbox(
-    "Speed mode",
+    "Run mode",
     ["Fast demo", "Balanced", "Deeper analysis"],
-    index=0,
-    help="Fast demo loads quickly. Deeper analysis uses more rows and may take longer."
+    index=0
 )
 
 mode_defaults = {
@@ -134,58 +174,77 @@ mode_defaults = {
     "Deeper analysis": {"rows": 220000, "top": 180, "support": 0.002, "confidence": 0.05},
 }
 
-st.sidebar.subheader("Data Size")
+st.sidebar.subheader("Data")
 row_limit = st.sidebar.slider(
-    "Transaction rows to read",
+    "Rows to read",
     min_value=20000,
     max_value=300000,
     value=mode_defaults[speed_mode]["rows"],
     step=20000
 )
-
-use_prior = st.sidebar.checkbox(
-    "Add prior-order file if available",
-    value=False,
-    help="This can improve data size but makes loading slower."
-)
-
-use_order_time = st.sidebar.checkbox(
-    "Use order time features if orders.csv exists",
-    value=True,
-    help="Adds order day, hour, and days since prior order for classification."
-)
+use_prior = st.sidebar.checkbox("Use prior-order file if available", value=False)
+use_order_time = st.sidebar.checkbox("Use order time features", value=True)
 
 st.sidebar.subheader("Basket Mining")
 top_n_products = st.sidebar.slider(
-    "Popular products used for basket rules",
+    "Products used in basket mining",
     min_value=40,
     max_value=250,
     value=mode_defaults[speed_mode]["top"],
     step=10
 )
-algorithm = st.sidebar.selectbox("Mining method", ["FP-Growth", "Apriori"], index=0)
+algorithm = st.sidebar.selectbox("Mining algorithm", ["FP-Growth", "Apriori"], index=0)
 min_support = st.sidebar.select_slider(
-    "Minimum support",
+    "Support",
     options=[0.001, 0.002, 0.003, 0.005, 0.0075, 0.01, 0.02],
     value=mode_defaults[speed_mode]["support"]
 )
 min_confidence = st.sidebar.select_slider(
-    "Minimum confidence",
+    "Confidence",
     options=[0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30],
     value=mode_defaults[speed_mode]["confidence"]
 )
-min_lift = st.sidebar.select_slider(
-    "Minimum lift",
-    options=[1.0, 1.1, 1.2, 1.5, 2.0],
-    value=1.1
-)
-max_len = st.sidebar.selectbox("Maximum products in one pattern", [2, 3], index=1)
+min_lift = st.sidebar.select_slider("Lift", options=[1.0, 1.1, 1.2, 1.5, 2.0], value=1.1)
+max_len = st.sidebar.selectbox("Max items in a pattern", [2, 3], index=1)
 
 st.sidebar.subheader("Profit Simulator")
-avg_price = st.sidebar.slider("Estimated average item price", 1.0, 25.0, 5.0, 0.5)
-profit_margin = st.sidebar.slider("Estimated profit margin", 0.10, 0.70, 0.30, 0.05)
+avg_price = st.sidebar.slider("Average item price ($)", 1.0, 25.0, 5.0, 0.5)
+profit_margin = st.sidebar.slider("Profit margin", 0.10, 0.70, 0.30, 0.05)
 
-# ---------------- FUNCTIONS ----------------
+# ---------------- HELPER FUNCTIONS ----------------
+def money(x):
+    return f"${x:,.0f}"
+
+
+def pct(x):
+    return f"{x * 100:.1f}%"
+
+
+def card(title, body, border="blue"):
+    st.markdown(
+        f"""
+        <div class="panel {border}">
+            <div class="card-title">{title}</div>
+            <div class="card-body">{body}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def kpi(label, value, note=""):
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-label">{label}</div>
+            <div class="kpi-number">{value}</div>
+            <div class="kpi-note">{note}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 @st.cache_data(show_spinner=False)
 def prepare_base_data(row_limit, use_prior, use_order_time, avg_price, profit_margin, top_n_products):
     if use_prior and Path("order_products__prior.csv").exists():
@@ -214,8 +273,7 @@ def prepare_base_data(row_limit, use_prior, use_order_time, avg_price, profit_ma
         needed = [c for c in ["order_id", "order_dow", "order_hour_of_day", "days_since_prior_order"] if c in order_cols]
         if len(needed) > 1:
             orders = pd.read_csv("orders.csv", usecols=needed)
-            order_ids = df["order_id"].unique()
-            orders = orders[orders["order_id"].isin(order_ids)]
+            orders = orders[orders["order_id"].isin(df["order_id"].unique())]
             df = df.merge(orders, on="order_id", how="left")
 
     before_rows = len(df)
@@ -353,14 +411,14 @@ def run_market_basket(row_limit, use_prior, use_order_time, avg_price, profit_ma
     rules["Rule"] = rules["Customer Buys"] + " → " + rules["Recommend"]
     rules["Rule Score"] = rules["confidence"] * rules["lift"]
 
-    def business_move(row):
+    def retail_use(row):
         if row["lift"] >= 2 and row["confidence"] >= 0.15:
             return "Best for bundle or checkout recommendation"
         if row["lift"] >= 1.5:
             return "Good for shelf placement or coupon test"
         return "Use carefully as a test rule"
 
-    rules["Retail Use"] = rules.apply(business_move, axis=1)
+    rules["Retail Use"] = rules.apply(retail_use, axis=1)
     rules = rules.sort_values(["Rule Score", "lift", "confidence"], ascending=False)
     return frequent, rules
 
@@ -375,7 +433,6 @@ def run_reorder_classification(row_limit, use_prior, use_order_time, avg_price, 
         return pd.DataFrame(), [], pd.DataFrame(), {}, {}, 0, 0
 
     work = df.copy()
-
     product_stats = (
         work.groupby("product_id")
         .agg(product_order_count=("order_id", "count"), product_reorder_rate=("reordered", "mean"))
@@ -387,15 +444,8 @@ def run_reorder_classification(row_limit, use_prior, use_order_time, avg_price, 
     work = work.merge(basket_feature, on="order_id", how="left")
 
     possible_features = [
-        "add_to_cart_order",
-        "order_dow",
-        "order_hour_of_day",
-        "days_since_prior_order",
-        "basket_size",
-        "product_order_count",
-        "product_reorder_rate",
-        "aisle_id",
-        "department_id"
+        "add_to_cart_order", "order_dow", "order_hour_of_day", "days_since_prior_order",
+        "basket_size", "product_order_count", "product_reorder_rate", "aisle_id", "department_id"
     ]
     features = [c for c in possible_features if c in work.columns]
 
@@ -493,7 +543,7 @@ def download_button(df, label, filename):
             mime="text/csv"
         )
 
-# ---------------- LOAD BASE DATA ONLY ----------------
+# ---------------- LOAD BASE DATA ----------------
 with st.spinner("Loading local retail data..."):
     df, cleaning_report, sales, basket_size, basket_dist, basket, departments, aisles = prepare_base_data(
         row_limit, use_prior, use_order_time, avg_price, profit_margin, top_n_products
@@ -511,131 +561,180 @@ if "rules" not in st.session_state:
 if "mining_done" not in st.session_state:
     st.session_state.mining_done = False
 
-# ---------------- HEADER ----------------
+# ---------------- HERO ----------------
 st.markdown("""
-<div class="main-hero">
+<div class="hero">
+    <div class="badge">Local CSV Data Mining System • No API • Retail Decision Support</div>
     <h1>Retail Growth Advisor</h1>
-    <p>Fast data mining dashboard that tells a retailer what to stock, what to discount, what to bundle, and what customers may reorder.</p>
+    <p>Turns grocery transactions into clear business actions: stock up, discount, bundle, recommend, and predict reorder behavior.</p>
 </div>
 """, unsafe_allow_html=True)
 
+# ---------------- KPI ROW ----------------
 m1, m2, m3, m4 = st.columns(4)
-metric_values = [
-    (m1, "Orders Analyzed", f"{df['order_id'].nunique():,}", "good-border"),
-    (m2, "Products Found", f"{df['product_name'].nunique():,}", "info-border"),
-    (m3, "Avg Basket Size", f"{basket_size['Basket Size'].mean():.2f}", "warn-border"),
-    (m4, "Rules Ready", f"{len(st.session_state.rules):,}", "good-border" if st.session_state.mining_done else "bad-border"),
-]
+with m1:
+    kpi("Orders Analyzed", f"{df['order_id'].nunique():,}", "cleaned transactions")
+with m2:
+    kpi("Products Found", f"{df['product_name'].nunique():,}", "unique products")
+with m3:
+    kpi("Average Basket", f"{basket_size['Basket Size'].mean():.2f}", "items per order")
+with m4:
+    kpi("Rules Ready", f"{len(st.session_state.rules):,}", "after basket mining")
 
-for col, label, value, border in metric_values:
-    with col:
-        st.markdown(f"""
-        <div class="metric-card {border}">
-            <div class="metric-label">{label}</div>
-            <div class="metric-number">{value}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-# ---------------- TABS ----------------
-tab_home, tab_clean, tab_products, tab_sections, tab_basket, tab_cart, tab_predict, tab_test, tab_export = st.tabs([
-    "Home",
-    "Clean Data",
-    "Product Demand",
-    "Store Sections",
-    "Basket Rules",
-    "Cart Advisor",
+# ---------------- MAIN TABS ----------------
+tab_overview, tab_actions, tab_mining, tab_prediction, tab_evidence = st.tabs([
+    "Executive View",
+    "Retail Actions",
+    "Basket Mining",
     "Reorder Prediction",
-    "Test Results",
-    "Downloads"
+    "Evidence & Downloads"
 ])
 
-with tab_home:
-    st.subheader("Store Action Summary")
+# ============================================================
+# TAB 1: EXECUTIVE VIEW
+# ============================================================
+with tab_overview:
+    st.subheader("What should the retailer do first?")
+
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        best_stock = stock_up.iloc[0] if not stock_up.empty else None
-        st.markdown("<div class='action-box good-border'>", unsafe_allow_html=True)
-        st.markdown("### Stock Up")
-        if best_stock is not None:
-            st.write(f"**{best_stock['product_name']}**")
-            st.write(f"Demand: {int(best_stock['Units']):,} units")
-        else:
-            st.write("No stock-up item found.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        if not stock_up.empty:
+            item = stock_up.iloc[0]
+            card(
+                "✅ Stock Up",
+                f"Keep **{item['product_name']}** available. It appears as a core seller with **{int(item['Units']):,} units** in the selected data. Estimated profit impact: **{money(item['Estimated Profit'])}**.",
+                "green"
+            )
 
     with c2:
-        best_sale = sale_candidates.iloc[0] if not sale_candidates.empty else None
-        st.markdown("<div class='action-box warn-border'>", unsafe_allow_html=True)
-        st.markdown("### Put on Sale")
-        if best_sale is not None:
-            st.write(f"**{best_sale['product_name']}**")
-            st.write(f"Demand: {int(best_sale['Units']):,} units")
-        else:
-            st.write("No sale item found.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        if not sale_candidates.empty:
+            item = sale_candidates.iloc[0]
+            card(
+                "🏷️ Put on Sale",
+                f"Test a discount or bundle for **{item['product_name']}**. It is a slow seller with **{int(item['Units']):,} units** in this sample.",
+                "orange"
+            )
 
     with c3:
-        st.markdown("<div class='action-box info-border'>", unsafe_allow_html=True)
-        st.markdown("### Next Step")
-        st.write("Open **Basket Rules** and press **Run Basket Mining** to find product bundles and checkout recommendations.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        if st.session_state.rules.empty:
+            card(
+                "🧺 Find Bundles",
+                "Go to **Basket Mining** and click **Run Basket Mining**. That will reveal product combinations for checkout recommendations and shelf placement.",
+                "blue"
+            )
+        else:
+            rule = st.session_state.rules.iloc[0]
+            card(
+                "🧺 Best Bundle",
+                f"When customers buy **{rule['Customer Buys']}**, recommend **{rule['Recommend']}**. Lift: **{rule['lift']:.2f}**. Confidence: **{rule['confidence']:.2f}**.",
+                "blue"
+            )
 
-    st.subheader("Top Products by Demand")
-    st.bar_chart(high_sellers.set_index("product_name")["Units"])
+    st.markdown("---")
+    left, right = st.columns([1.2, 1])
 
-    st.subheader("Basket Size Pattern")
-    st.bar_chart(basket_dist.set_index("Basket Size")["Number of Orders"])
+    with left:
+        st.subheader("Top Product Demand")
+        st.bar_chart(high_sellers.set_index("product_name")["Units"])
 
-with tab_clean:
-    st.subheader("Data Cleaning Results")
-    st.dataframe(cleaning_report, use_container_width=True)
+    with right:
+        st.subheader("Basket Size Pattern")
+        st.bar_chart(basket_dist.set_index("Basket Size")["Number of Orders"])
 
-    st.subheader("Cleaned Data Preview")
-    st.dataframe(df.head(35), use_container_width=True)
+    st.info("Presentation tip: start here. Explain that the app first gives a simple business decision, then users can open the mining and evidence tabs for the technical proof.")
 
-    st.subheader("Basket Format Preview")
-    st.caption("Rows are orders. Columns are products. True means the customer bought that product.")
-    st.dataframe(basket.head(8), use_container_width=True)
-    st.write("Basket shape:", basket.shape)
+# ============================================================
+# TAB 2: RETAIL ACTIONS
+# ============================================================
+with tab_actions:
+    st.subheader("Retail Action Center")
+    st.caption("This tab hides large tables behind buttons/toggles so the app feels simple for a real user.")
 
-with tab_products:
-    st.subheader("High-Demand Products")
-    st.caption("These are the best products to keep in stock and display clearly.")
-    st.dataframe(high_sellers, use_container_width=True)
+    a1, a2, a3, a4 = st.columns(4)
+    with a1:
+        show_stock = st.toggle("Show stock-up list", value=False)
+    with a2:
+        show_sale = st.toggle("Show sale list", value=False)
+    with a3:
+        show_sections = st.toggle("Show departments/aisles", value=False)
+    with a4:
+        show_all_products = st.toggle("Show full product strategy", value=False)
 
-    st.subheader("Low-Demand Products")
-    st.caption("These are candidates for discounts, bundles, or lower reorder quantity.")
-    st.dataframe(low_sellers, use_container_width=True)
+    st.markdown("---")
 
-    st.subheader("Product Class Summary")
-    abc_summary = sales["Product Class"].value_counts().reset_index()
-    abc_summary.columns = ["Product Class", "Number of Products"]
-    st.dataframe(abc_summary, use_container_width=True)
+    if not any([show_stock, show_sale, show_sections, show_all_products]):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            card("1. Protect Core Sellers", "High-demand A-class products should stay in stock. Running out of these products can lose easy sales.", "green")
+        with c2:
+            card("2. Move Slow Sellers", "C-class products are better candidates for discounts, small bundles, or lower reorder quantity.", "orange")
+        with c3:
+            card("3. Increase Basket Size", "Use basket rules to recommend related products during checkout or place them near each other in the store.", "purple")
 
-with tab_sections:
-    st.subheader("Department Performance")
-    if departments.empty:
-        st.warning("departments.csv was not found, so this section is skipped.")
-    else:
-        st.dataframe(departments.head(25), use_container_width=True)
-        st.bar_chart(departments.head(15).set_index("department")["Units"])
+    if show_stock:
+        st.subheader("Stock-Up Products")
+        st.caption("These products drive demand. A retailer should keep them available and visible.")
+        st.dataframe(
+            stock_up[["product_name", "Units", "Orders", "Reorder Rate", "Estimated Revenue", "Estimated Profit", "Retail Action"]],
+            width="stretch"
+        )
 
-    st.subheader("Aisle Performance")
-    if aisles.empty:
-        st.warning("aisles.csv was not found, so this section is skipped.")
-    else:
-        st.dataframe(aisles.head(25), use_container_width=True)
-        st.bar_chart(aisles.head(15).set_index("aisle")["Units"])
+    if show_sale:
+        st.subheader("Sale / Reduce-Reorder Products")
+        st.caption("These products are slow sellers. A retailer can test discounts or bundle them with popular items.")
+        st.dataframe(
+            sale_candidates[["product_name", "Units", "Orders", "Reorder Rate", "Estimated Revenue", "Estimated Profit", "Retail Action"]],
+            width="stretch"
+        )
 
-with tab_basket:
-    st.subheader("Basket Rules")
-    st.caption("This is the heaviest step, so it only runs when you press the button.")
+    if show_sections:
+        section_left, section_right = st.columns(2)
+        with section_left:
+            st.subheader("Department Performance")
+            if departments.empty:
+                st.warning("departments.csv was not found.")
+            else:
+                st.bar_chart(departments.head(12).set_index("department")["Units"])
+                with st.expander("Open department table"):
+                    st.dataframe(departments.head(30), width="stretch")
+        with section_right:
+            st.subheader("Aisle Performance")
+            if aisles.empty:
+                st.warning("aisles.csv was not found.")
+            else:
+                st.bar_chart(aisles.head(12).set_index("aisle")["Units"])
+                with st.expander("Open aisle table"):
+                    st.dataframe(aisles.head(30), width="stretch")
 
-    run_button = st.button("Run Basket Mining", type="primary")
+    if show_all_products:
+        st.subheader("Full Product Strategy Table")
+        st.caption("A = core seller, B = normal seller, C = slow seller.")
+        st.dataframe(sales, width="stretch")
+
+# ============================================================
+# TAB 3: BASKET MINING
+# ============================================================
+with tab_mining:
+    st.subheader("Basket Mining Lab")
+    st.caption("This step runs only when clicked because association rule mining is the heaviest part.")
+
+    c1, c2, c3 = st.columns([1, 1, 2])
+    with c1:
+        run_button = st.button("Run Basket Mining", type="primary")
+    with c2:
+        clear_button = st.button("Clear Rules")
+    with c3:
+        st.write(f"Current settings: **{algorithm}**, support **{min_support}**, confidence **{min_confidence}**, lift **{min_lift}**")
+
+    if clear_button:
+        st.session_state.frequent = pd.DataFrame()
+        st.session_state.rules = pd.DataFrame()
+        st.session_state.mining_done = False
+        st.rerun()
 
     if run_button:
-        with st.spinner("Finding frequent itemsets and association rules..."):
+        with st.spinner("Mining product combinations..."):
             frequent, rules = run_market_basket(
                 row_limit, use_prior, use_order_time, avg_price, profit_margin,
                 top_n_products, algorithm, min_support, min_confidence, min_lift, max_len
@@ -648,52 +747,68 @@ with tab_basket:
     rules = st.session_state.rules
 
     if not st.session_state.mining_done:
-        st.info("Press **Run Basket Mining** to generate itemsets and rules.")
+        card("Ready to Mine", "Click **Run Basket Mining** to find frequent itemsets and association rules. Use Fast Demo for quick presentation performance.", "blue")
     else:
-        st.subheader("Frequent Itemsets")
-        if frequent.empty:
-            st.warning("No itemsets found. Lower support or use more rows.")
-        else:
-            st.dataframe(frequent[["Itemset", "Item Count", "support"]].head(50), use_container_width=True)
+        r1, r2, r3 = st.columns(3)
+        with r1:
+            kpi("Frequent Itemsets", f"{len(frequent):,}", "product patterns")
+        with r2:
+            kpi("Association Rules", f"{len(rules):,}", "recommendation rules")
+        with r3:
+            avg_lift = rules["lift"].mean() if not rules.empty else 0
+            kpi("Average Lift", f"{avg_lift:.2f}", "rule strength")
 
-        st.subheader("Association Rules")
         if rules.empty:
-            st.warning("No rules found. Try support 0.003, confidence 0.05, and lift 1.0.")
+            st.warning("No rules found. Try lower support, lower lift, or more rows.")
         else:
-            show_rules = rules[["Rule", "Customer Buys", "Recommend", "support", "confidence", "lift", "Rule Score", "Retail Use"]].head(50)
-            st.dataframe(show_rules, use_container_width=True)
-            st.bar_chart(show_rules.head(20).set_index("Rule")["lift"])
-
-with tab_cart:
-    st.subheader("Cart Advisor")
-    st.caption("Pick what a customer has in their cart. The app recommends what to show next.")
-
-    if st.session_state.rules.empty:
-        st.warning("Run Basket Mining first in the Basket Rules tab.")
-    else:
-        cart_items = st.multiselect("Customer cart", sorted(list(basket.columns)))
-        recs = recommend_from_cart(st.session_state.rules, cart_items)
-
-        if len(cart_items) == 0:
-            st.info("Choose one or more cart products to see recommendations.")
-        elif recs.empty:
-            st.warning("No recommendation found for this cart. Try another product.")
-        else:
-            st.dataframe(recs.head(20), use_container_width=True)
-            top_rec = recs.iloc[0]
-            st.success(
-                f"Best recommendation: {top_rec['Recommended Product']} "
-                f"with lift {top_rec['Lift']:.2f} and confidence {top_rec['Confidence']:.2f}."
+            best = rules.iloc[0]
+            card(
+                "Best Recommendation Rule",
+                f"If a customer buys **{best['Customer Buys']}**, recommend **{best['Recommend']}**. This rule has lift **{best['lift']:.2f}** and confidence **{best['confidence']:.2f}**.",
+                "green"
             )
 
-with tab_predict:
+            show_rule_table = st.toggle("Open association rule table", value=False)
+            if show_rule_table:
+                show_rules = rules[["Rule", "Customer Buys", "Recommend", "support", "confidence", "lift", "Rule Score", "Retail Use"]].head(60)
+                st.dataframe(show_rules, width="stretch")
+
+            show_itemsets = st.toggle("Open frequent itemset table", value=False)
+            if show_itemsets and not frequent.empty:
+                st.dataframe(frequent[["Itemset", "Item Count", "support"]].head(60), width="stretch")
+
+            st.subheader("Cart Advisor")
+            st.caption("Pick products in a customer cart. The app suggests what to recommend next.")
+            cart_items = st.multiselect("Customer cart", sorted(list(basket.columns)))
+            recs = recommend_from_cart(rules, cart_items)
+
+            if len(cart_items) == 0:
+                st.info("Choose one or more cart products to see recommendations.")
+            elif recs.empty:
+                st.warning("No recommendation found for this cart. Try another product.")
+            else:
+                top_rec = recs.iloc[0]
+                card(
+                    "Checkout Recommendation",
+                    f"Recommend **{top_rec['Recommended Product']}** because the cart already has **{top_rec['Because Cart Has']}**. Lift: **{top_rec['Lift']:.2f}**. Confidence: **{top_rec['Confidence']:.2f}**.",
+                    "purple"
+                )
+                with st.expander("Open all cart recommendations"):
+                    st.dataframe(recs.head(20), width="stretch")
+
+# ============================================================
+# TAB 4: REORDER PREDICTION
+# ============================================================
+with tab_prediction:
     st.subheader("Reorder Prediction")
-    st.caption("This runs classification models only when you press the button to avoid slow page loading.")
+    st.caption("Classification model: predicts reordered = 0 or 1. It only trains after clicking the button.")
 
     if "reordered" not in df.columns:
         st.warning("The reordered column was not found. Use order_products__train.csv or prior data with the reordered column.")
     else:
-        if st.button("Run Reorder Prediction Models", type="primary"):
+        run_predict = st.button("Run Classification Models", type="primary")
+
+        if run_predict:
             with st.spinner("Training Decision Tree, Random Forest, Naive Bayes, and KNN..."):
                 model_df, features, results, reports, matrices, train_size, test_size = run_reorder_classification(
                     row_limit, use_prior, use_order_time, avg_price, profit_margin, top_n_products
@@ -707,73 +822,105 @@ with tab_predict:
                 st.session_state.class_test_size = test_size
 
         if "class_results" not in st.session_state:
-            st.info("Press **Run Reorder Prediction Models** to create the training/test set and model comparison.")
+            card(
+                "Classification Not Run Yet",
+                "Click **Run Classification Models** to build a training/test split and compare Decision Tree, Random Forest, Naive Bayes, and KNN.",
+                "blue"
+            )
         else:
+            results = st.session_state.class_results
+            best = results.iloc[0]
+            p1, p2, p3 = st.columns(3)
+            with p1:
+                kpi("Best Model", best["Model"], "highest F1 score")
+            with p2:
+                kpi("Accuracy", f"{best['Accuracy']:.3f}", "test set")
+            with p3:
+                kpi("F1 Score", f"{best['F1 Score']:.3f}", "balanced score")
+
             st.write("Selected features:", st.session_state.class_features)
-            st.write("Training set size:", st.session_state.class_train_size)
-            st.write("Test set size:", st.session_state.class_test_size)
+            st.write("Training set size:", st.session_state.class_train_size, " | Test set size:", st.session_state.class_test_size)
+
+            st.subheader("Model Comparison")
+            st.bar_chart(results.set_index("Model")[["Accuracy", "F1 Score"]])
+
+            if st.toggle("Open model results table", value=False):
+                st.dataframe(results, width="stretch")
 
             class_dist = st.session_state.class_model_df["reordered"].value_counts().reset_index()
             class_dist.columns = ["Class", "Count"]
             class_dist["Meaning"] = class_dist["Class"].map({0: "Not Reordered", 1: "Reordered"})
-            st.subheader("Class Distribution")
-            st.dataframe(class_dist, use_container_width=True)
 
-            st.subheader("Model Comparison")
-            st.dataframe(st.session_state.class_results, use_container_width=True)
-            st.bar_chart(st.session_state.class_results.set_index("Model")["Accuracy"])
+            if st.toggle("Open class distribution and confusion matrix", value=False):
+                st.subheader("Class Distribution")
+                st.dataframe(class_dist, width="stretch")
 
-            best = st.session_state.class_results.iloc[0]
-            st.success(f"Best model: {best['Model']} | Accuracy: {best['Accuracy']:.3f} | F1 Score: {best['F1 Score']:.3f}")
+                chosen_model = st.selectbox("Choose model", results["Model"].tolist())
+                matrix = pd.DataFrame(
+                    st.session_state.class_matrices[chosen_model],
+                    index=["Actual 0", "Actual 1"],
+                    columns=["Predicted 0", "Predicted 1"]
+                )
+                st.subheader("Confusion Matrix")
+                st.dataframe(matrix, width="stretch")
 
-            chosen_model = st.selectbox("Show confusion matrix for", st.session_state.class_results["Model"].tolist())
-            matrix = pd.DataFrame(
-                st.session_state.class_matrices[chosen_model],
-                index=["Actual 0", "Actual 1"],
-                columns=["Predicted 0", "Predicted 1"]
-            )
-            st.dataframe(matrix, use_container_width=True)
-            st.dataframe(pd.DataFrame(st.session_state.class_reports[chosen_model]).transpose(), use_container_width=True)
+                st.subheader("Classification Report")
+                st.dataframe(pd.DataFrame(st.session_state.class_reports[chosen_model]).transpose(), width="stretch")
 
-with tab_test:
-    st.subheader("Test Results")
-    st.caption("Compare settings to show evaluation, not just final output.")
+# ============================================================
+# TAB 5: EVIDENCE AND DOWNLOADS
+# ============================================================
+with tab_evidence:
+    st.subheader("Evidence, Testing, and Downloads")
 
-    if st.button("Run Support Test", type="primary"):
-        rows = []
-        for support_value in [0.001, 0.002, 0.003, 0.005, 0.0075, 0.01]:
-            temp_frequent, temp_rules = run_market_basket(
-                row_limit, use_prior, use_order_time, avg_price, profit_margin,
-                top_n_products, algorithm, support_value, min_confidence, min_lift, max_len
-            )
-            rows.append({
-                "Support": support_value,
-                "Frequent Itemsets": len(temp_frequent),
-                "Association Rules": len(temp_rules),
-                "Average Lift": temp_rules["lift"].mean() if not temp_rules.empty else 0,
-                "Average Confidence": temp_rules["confidence"].mean() if not temp_rules.empty else 0
-            })
-        test_df = pd.DataFrame(rows)
-        st.session_state.support_test = test_df
+    e1, e2 = st.columns(2)
+    with e1:
+        with st.expander("Data cleaning proof"):
+            st.dataframe(cleaning_report, width="stretch")
+            st.dataframe(df.head(30), width="stretch")
 
-    if "support_test" in st.session_state:
-        st.dataframe(st.session_state.support_test, use_container_width=True)
-        st.line_chart(st.session_state.support_test.set_index("Support")[["Frequent Itemsets", "Association Rules"]])
-    else:
-        st.info("Press **Run Support Test** to compare mining settings.")
+        with st.expander("Basket format proof"):
+            st.caption("Rows are orders. Columns are products. True means the product appeared in that order.")
+            st.write("Basket shape:", basket.shape)
+            st.dataframe(basket.head(8), width="stretch")
 
-with tab_export:
-    st.subheader("Download Result Files")
-    download_button(sales, "Download Product Strategy", "product_strategy.csv")
-    download_button(stock_up, "Download Stock-Up List", "stock_up_products.csv")
-    download_button(sale_candidates, "Download Sale Candidate List", "sale_candidates.csv")
-    download_button(cleaning_report, "Download Cleaning Report", "cleaning_report.csv")
+    with e2:
+        st.subheader("Run Support Test")
+        st.caption("This compares support values to show evaluation, not just final output.")
+        if st.button("Run Support Test", type="primary"):
+            rows = []
+            for support_value in [0.001, 0.002, 0.003, 0.005, 0.0075, 0.01]:
+                temp_frequent, temp_rules = run_market_basket(
+                    row_limit, use_prior, use_order_time, avg_price, profit_margin,
+                    top_n_products, algorithm, support_value, min_confidence, min_lift, max_len
+                )
+                rows.append({
+                    "Support": support_value,
+                    "Frequent Itemsets": len(temp_frequent),
+                    "Association Rules": len(temp_rules),
+                    "Average Lift": temp_rules["lift"].mean() if not temp_rules.empty else 0,
+                    "Average Confidence": temp_rules["confidence"].mean() if not temp_rules.empty else 0
+                })
+            st.session_state.support_test = pd.DataFrame(rows)
 
-    if not st.session_state.rules.empty:
-        export_rules = st.session_state.rules[["Rule", "Customer Buys", "Recommend", "support", "confidence", "lift", "Rule Score", "Retail Use"]]
-        download_button(export_rules, "Download Basket Rules", "basket_rules.csv")
+        if "support_test" in st.session_state:
+            st.dataframe(st.session_state.support_test, width="stretch")
+            st.line_chart(st.session_state.support_test.set_index("Support")[["Frequent Itemsets", "Association Rules"]])
 
-    if "class_results" in st.session_state:
-        download_button(st.session_state.class_results, "Download Classification Results", "classification_results.csv")
+    st.markdown("---")
+    st.subheader("Download Results")
+    d1, d2, d3 = st.columns(3)
+    with d1:
+        download_button(sales, "Download Product Strategy", "product_strategy.csv")
+        download_button(stock_up, "Download Stock-Up List", "stock_up_products.csv")
+    with d2:
+        download_button(sale_candidates, "Download Sale Candidate List", "sale_candidates.csv")
+        download_button(cleaning_report, "Download Cleaning Report", "cleaning_report.csv")
+    with d3:
+        if not st.session_state.rules.empty:
+            export_rules = st.session_state.rules[["Rule", "Customer Buys", "Recommend", "support", "confidence", "lift", "Rule Score", "Retail Use"]]
+            download_button(export_rules, "Download Basket Rules", "basket_rules.csv")
+        if "class_results" in st.session_state:
+            download_button(st.session_state.class_results, "Download Classification Results", "classification_results.csv")
 
-st.caption("Profit is estimated because this dataset does not include real item prices or product costs.")
+st.caption("Profit is estimated because this dataset does not include real item prices or product costs. Heavy mining and model training are click-based to keep the app fast.")
